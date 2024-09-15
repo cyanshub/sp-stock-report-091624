@@ -1,6 +1,7 @@
 // 載入所需工具
 const { default: axios } = require('axios')
 const { SMA, RSI } = require('technicalindicators') // 股市分析工具
+const moment = require('moment') // 維持時間格式一致性
 
 // 後端伺服器位置
 const baseUrl = 'https://query1.finance.yahoo.com/v8/finance/chart'
@@ -26,9 +27,11 @@ const getStockData = async (stockSymbol, stockRange) => {
     // 處理從 axios 返回的資料, 其格式以 response.data 包裝 (可先觀察 API 規格)
     const data = res.data.chart.result[0]
 
+    // 使用 moment 格式化日期為 "YYYY/MM/DD"
     const timestamps = data.timestamp.map((timestamp) =>
-      new Date(timestamp * 1000).toLocaleDateString()
-    ) // 日期: 將日期轉換成可讀的形式
+      moment.unix(timestamp).format('YYYY/MM/DD')
+    )
+
     const closingPrices = data.indicators.quote[0].close // 收盤價
     const volumes = data.indicators.quote[0].volume // 成交量
     const stockData = { timestamps, closingPrices, volumes }
