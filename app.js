@@ -10,6 +10,7 @@ const methodOverride = require('method-override')
 const { apis, pages } = require('./routes')
 const cors = require('cors')
 const scheduleKeepAliveReq  = require('./helpers/req-helpers')
+const scheduleCronjob = require('./helpers/cronjob-helpers')
 
 // 設定應用程式
 const app = express()
@@ -28,6 +29,7 @@ app.use('/', pages)
 
 // 掛載執行處理程序
 scheduleKeepAliveReq() // 定時發送請求以維持入站流量
+scheduleCronjob() // 將指定的股票最新資訊發送給指定用戶
 
 // 啟動並監聽網站
 app.listen(port, () => {
