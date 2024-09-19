@@ -7,6 +7,7 @@ const {
 
 const bcrypt = require('bcrypt') // 加密工具
 const crypto = require('crypto') // Node.js 加密模組
+const setupAllUserWatches = require('../helpers/schedule-watches-helpers') // 根據追蹤記錄動態設定通知排程
 
 // 載入所需 model
 const { Watch } = require('../models')
@@ -234,6 +235,9 @@ const stockServices = {
           : '驗證碼與先前 email 收到的驗證碼相同' // 將明碼的驗證碼包裝進結果
       }
 
+      // 異動追蹤記錄時, 動態觸發設定通知排程
+      setupAllUserWatches()
+
       return cb(null, data)
     } catch (error) {
       error.messages = '新增追蹤股票失敗'
@@ -300,6 +304,10 @@ const stockServices = {
       // 切換顯示成所輸入的明碼後回傳
       deletedWatch.verificationCode = verificationCode
       const data = deletedWatch
+
+      // 異動追蹤記錄時, 動態觸發設定通知排程
+      setupAllUserWatches()
+
       return cb(null, data)
     } catch (error) {
       error.messages = '取消追蹤股票失敗'
@@ -423,6 +431,10 @@ const stockServices = {
       const watchQuery = watch
       watchQuery.verificationCode = verificationCode
       const data = watchQuery
+
+      // 異動追蹤記錄時, 動態觸發設定通知排程
+      setupAllUserWatches()
+
       return cb(null, data)
     } catch (error) {
       error.messages = '暫時無法更新每日監控狀態'
@@ -480,6 +492,9 @@ const stockServices = {
       })
 
       const data = deletedWatches // 返回刪除結果資訊
+
+      // 異動追蹤記錄時, 動態觸發設定通知排程
+      setupAllUserWatches()
 
       return cb(null, data)
     } catch (error) {

@@ -16,25 +16,47 @@ const {
 } = require('./email-helpers')
 
 // 執行處理程序
-const scheduleCronjob = () => {
-  // 設定 cronjob: 每天凌晨 0 點（UTC+8）執行
+// 採用參數為可選值的匿名函數寫法
+const scheduleCronjob = ({
+  email,
+  stockSymbol,
+  lowRSI,
+  dropRSI,
+  triggerHour,
+  isDailyNews
+} = {}) => {
+  // 假設可以函式傳入的參數拿到 email、股票代號、rsiLow、triggerHour 通知時刻(小時)
+  // 傳入的參數皆為可選值, 故使用傳入的參數或環境變數
+  const emailTo = email || process.env.GMAIL_TO
+  const stock = stockSymbol ? stockSymbol : process.env.STOCK_SYMBOL || '0050'
+  const rsiLow = lowRSI ? Number(lowRSI) : Number(process.env.RSI_LOW) || 30
+  const rsiDrop = dropRSI ? Number(dropRSI) : Number(process.env.RSI_DROP) || 10
+
+  // 設定 cronjob: 使用傳入的時間或者使用預設時刻
+  const hour = triggerHour || '21' // 預設為午間 21 時執行
+
   // 利用 cron 表達式設定任務執行時間, 用 5 個字段指定任務執行時間
-  const cronExp = process.env.CRON_EXP
+  let cronExp = `0 ${hour} * * *` // 每天的 `triggerHour` (hour) 執行
+
+  // // 測試快速觸發
+  // cronExp = `0-59/5 ${hour} * * *`
+  // console.log('測試觸發 cronjob:', stock)
+  // console.log('測試觸發 cronjob:', cronExp)
 
   // 調用 cronjob 函數: 提供最新股票資訊的信件通知服務
   // cron.schedule(執行時間, 觸發的 function, 設定時區)
   cron.schedule(
     cronExp,
     async () => {
-      // 從環境變數拿取股票代號
-      const stockSymbol = process.env.STOCK_SYMBOL || '0050'
+      // // 測試快速觸發
+      // console.log('測試觸發於:', hour)
 
       // 股票查詢的時間範圍(最新資料) P.S. 算指標還是需要足夠的時間
       const stockRange = process.env.STOCK_RANGE || '1y'
 
       // 得到股票資訊 EX: 日期、收盤價、成交量
       const { timestamps, closingPrices, volumes } = await getStockData(
-        stockSymbol,
+        stock,
         stockRange
       )
 
@@ -56,14 +78,10 @@ const scheduleCronjob = () => {
       }
 
       // 提取 stockInfo
-      const stockInfo = { ...objArrLatest }
+      let stockInfo = { ...objArrLatest }
 
       // 拿到前一筆 RSI 數據
-      const rsiPrevious = objArr[objArr.length - 2]?.rsi // 關於 RSI 大幅下降警報
-
-      // 設定發送條件(確保環境變數正確轉換為數字型別)
-      const rsiLow = Number(process.env.RSI_LOW) || 30 // RSI 低值預設為 30
-      const rsiDrop = Number(process.env.RSI_DROP) || 10 // 關於 RSI 大幅下降警報
+      let rsiPrevious = objArr[objArr.length - 2]?.rsi // 關於 RSI 大幅下降警報
 
       // 確保 rsiCurrent 與 rsiPrevious 皆存在並且是數字
       if (
@@ -84,11 +102,13 @@ const scheduleCronjob = () => {
 
       // 建立 email 基本資訊
       const emailFrom = process.env.GMAIL_USER
-      const emailTo = process.env.GMAIL_TO
 
       // email 傳送信件內容
       // 發送定期報告的 email
-      await sendDailyNewsEmail(emailFrom, emailTo, stockInfo, reportTime)
+      if (isDailyNews) {
+        // 只有當 isDailyNews 為 true 的時候, 才寄發每日收盤價
+        await sendDailyNewsEmail(emailFrom, emailTo, stockInfo, reportTime)
+      }
 
       // 發送死亡交叉通知
       if (stockInfo.crossType === 'death-cross') {

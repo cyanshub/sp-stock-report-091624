@@ -1,6 +1,6 @@
 # 股市訊號分析網
 
-![導覽圖片](public/readme/introduce.png)
+![導覽圖片](public/readme/cover.png)
 
 ## 介紹
 
@@ -73,6 +73,30 @@
 您可以透過瀏覽器直接與本專案提供的 API 功能進行互動:
 [WEB API](https://sp-stock-report-091624.onrender.com/)
 
+### 您可以透過以下路由, 使用本站提供的事件通知服務
+
+- 一般而言, 路由最好按照 RESTful API 的精神設計, 然而本站的前端介面尚未上線, 因此暫時透過瀏覽器接收 GET 請求, 達成`查詢追蹤記錄、新增追蹤指定股票、取消追蹤指定股票、一次取消登錄在 email 的所有股票追蹤`等功能
+
+- 當使用以下追蹤服務時, 包括`查詢、新增、更新, 或移除`等功能, 系統會顯示提示訊息, 並寄發通知信件到指定的 email; 若未看到成功提示訊息, 代表操作未正確完成
+
+- 驗證碼是隨機生成的, 在建立股票追蹤時, 會自動寄發到指定的 email, 請妥善保存; 為確保資料安全, 有關查詢、更新、移除等操作都會需要提供驗證碼
+
+- 若忘記驗證碼, 可利用當初登記的 email 寫信給管理員, 我們可以取消其 email 的所有股票追蹤記錄
+
+## 追蹤股票的路由
+
+| 功能                               | 方法                  | 路徑                                                                                           |
+| --------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------- |
+| 查詢所有股票通知設定 (list)         | GET                   | https://sp-stock-report-091624.onrender.com/api/stocks/list/user1@example.com+驗證碼          |
+| 新增追蹤股票事件通知 (watch)        | GET (預計改成 POST)   | https://sp-stock-report-091624.onrender.com/api/stocks/watch/user1@example.com+0050             |
+| 開關股票每日收盤價通知設定 (toggle)  | GET (預計改成 PATCH)  | https://sp-stock-report-091624.onrender.com/api/stocks/toggle/user1@example.com+++驗證碼        |
+| 取消追蹤股票事件通知 (unwatch)      | GET (預計改成 DELETE) | https://sp-stock-report-091624.onrender.com/api/stocks/unwatch/user1@example.com+0050+++驗證碼   |
+| 一次取消所有追蹤 (drop)             | GET (預計改成 DELETE) | https://sp-stock-report-091624.onrender.com/api/stocks/drop/user1@example.com+驗證碼            |
+
+### 開啟每日收盤價通知功能
+
+若想定期接收每日的最新收盤價及 RSI 指標, 請在網址列末尾加上 `isDailyNewsTrue` (不區分大小寫、可含空白鍵、但須以 `+ 號`區分前面兩個參數(RSI 警報值、通知時刻)之欄位), 例如: `/api/stocks/watch/user1@example.com + 0050 + + + isdailynewstrue`
+
 ### 建議安裝 JSON 美化工具
 
 為了更方便查看 API 返回的 JSON 資料, 建議您在瀏覽器中安裝 JSON 美化工具。以下是不同瀏覽器的推薦擴充套件:
@@ -81,7 +105,6 @@
 - **Google Chrome**: [JSON Formatter](https://chromewebstore.google.com/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa)
 - **Firefox**: [JSON Lite](https://addons.mozilla.org/zh-TW/firefox/addon/json-lite)
 - **Edge**: [JSON Viewer Pro](https://microsoftedge.microsoft.com/addons/detail/json-formatter/dohcbdfhklpbkbljhccjbbmcmeekaakm)
-
 
 您可以安裝對應的擴充套件來更方便地查看 API 返回的 JSON 資料
 
@@ -107,6 +130,7 @@
 ### 依賴項目 (Dependencies)
 
 - axios: 1.7.2
+- bcrypt: 5.1.1
 - cors: 2.8.5
 - csv-parser: 3.0.0
 - dotenv: 10.0.0
