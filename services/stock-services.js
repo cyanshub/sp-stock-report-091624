@@ -2,16 +2,17 @@
 const { getStockData, processStockData } = require('../helpers/stock-helpers')
 
 // 載入所需 model
+const { Watch } = require('../models')
 
 // 設計 stockServices
 const stockServices = {
   getStocks: (req, cb) =>
     cb(null, {
       index: '首頁',
-      view: '請在網址列輸入欲查詢的股票代號, 例: /api/stocks/0050',
-      hint: '查詢時間範圍預設以今日為基準回朔 1 年',
+      view: '請在網址列輸入你想查詢的股票代號, 例如: /api/stocks/0050',
+      hint: '預設查詢範圍是從今天起回溯 1 年',
       download:
-        '在股票代碼後方輸入 download 可下載對應的報表, 例: /api/stocks/0050/download'
+        '在股票代號後加上 download 就能下載對應的報表, 例如: /api/stocks/0050/download'
     }),
   getStock: (req, cb) => {
     // 從動態路由拿取股票代號
@@ -29,7 +30,7 @@ const stockServices = {
       })
       .then((objArr) => {
         // 優先顯示近期資料: 根據 id 進行降冪排序
-        objArr.sort((a,b) => b.id - a.id)
+        objArr.sort((a, b) => b.id - a.id)
 
         return cb(null, objArr)
       })
@@ -51,7 +52,12 @@ const stockServices = {
       })
       .then((objArr) => cb(null, objArr))
       .catch((err) => cb(err))
-  }
+  },
+  watchStockForEmail: (req, cb) => cb(null, { messages: '功能開發中' }),
+  unwatchStockForEmail: (req, cb) => cb(null, { messages: '功能開發中' }),
+  listWatchesForEmail: (req, cb) => cb(null, { messages: '功能開發中' }),
+  toggleDaliyWatchForEmail: (req, cb) => cb(null, { messages: '功能開發中' }),
+  dropEmail: (req, cb) => cb(null, { messages: '功能開發中' })
 }
 
 module.exports = stockServices

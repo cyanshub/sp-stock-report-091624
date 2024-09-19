@@ -63,6 +63,31 @@ const stockController = {
         })
       })
       .catch((err) => next(err)) // 使用 catch 處理異常
+  },
+  watchStockForEmail: async (req, res, next) => {
+    return stockServices.watchStockForEmail(req, (err, data) => {
+      err ? next(err) : res.json({ status: 200, data })
+    })
+  },
+  unwatchStockForEmail: async (req, res, next) => {
+    return stockServices.unwatchStockForEmail(req, (err, data) => {
+      err ? next(err) : res.json({ status: 200, data })
+    })
+  },
+  listWatchesForEmail: async (req, res, next) => {
+    return stockServices.listWatchesForEmail(req, (err, data) => {
+      err ? next(err) : res.json({ status: 200, data })
+    })
+  },
+  toggleDaliyWatchForEmail: async (req, res, next) => {
+    return stockServices.changeWatchForEmail(req, (err, data) => {
+      err ? next(err) : res.json({ status: 200, data })
+    })
+  },
+  dropEmail: async (req, res, next) => {
+    return stockServices.dropEmail(req, (err, data) => {
+      err ? next(err) : res.json({ status: 200, data })
+    })
   }
 }
 
