@@ -181,9 +181,24 @@ const formatNumber = (number) => {
   return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
+// 檢查股票的有效性
+const isStockSymbolValid = async (stockSymbol) => {
+  try {
+    const res = await axiosInstance.get(`/${stockSymbol}.TW`)
+    if (res.data && res.data.chart && res.data.chart.result) {
+      return true // 股票代號有效
+    } else {
+      return false // 股票代號無效
+    }
+  } catch (error) {
+    return false // 請求失敗
+  }
+}
+
 module.exports = {
   getStockData,
   rollingAverageInterpolation,
   fillWithNaN,
-  processStockData
+  processStockData,
+  isStockSymbolValid
 }

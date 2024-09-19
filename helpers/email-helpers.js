@@ -201,6 +201,121 @@ const sendRSIDropAlert = async (
   await sendEmail(mailOptions)
 }
 
+// 發送成功新增追蹤股票提示
+const sendWatchEmail = async (data) => {
+  // 設定 email 的內容
+  const mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: data.email,
+    subject: `指定股票 ${data.stockSymbol} 追蹤已建立`,
+    text: `
+    ${data.email}, 您好:
+
+    感謝您選擇使用我們的服務。
+    以下是追蹤記錄的相關參數: 
+
+    - 股票代號: ${data.stockSymbol}
+    - RSI 通知警報值: ${data.rsiLow}
+    - 通知時間: 每天 ${data.triggerHour} 時
+    - 是否接收每日更新: ${data.isDailyNews ? '是' : '否'}
+    - 驗證碼: ${data.verificationCode}
+
+    若您有任何疑問或需要協助, 歡迎隨時與我們聯絡。
+    我們很高興能夠為您提供服務, 並祝您投資順利。
+
+    Best regards,
+    Your Stock Monitoring System
+    `
+  }
+
+  // 發送 email
+  return transporter.sendMail(mailOptions)
+}
+
+// 發送成功解除追蹤股票提示
+const sendUnwatchEmail = async (data) => {
+  // 設定 email 的內容
+  const mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: data.email,
+    subject: `指定股票 ${data.stockSymbol} 追蹤已解除`,
+    text: `
+    ${data.email}, 您好:
+
+    感謝您選擇使用我們的服務。
+    以下解除追蹤記錄的相關參數: : 
+
+    - 股票代號: ${data.stockSymbol}
+    - RSI 通知警報值: ${data.rsiLow}
+    - 通知時間: 每天 ${data.triggerHour} 時
+    - 是否接收每日更新: ${data.isDailyNews ? '是' : '否'}
+    - 驗證碼: ${data.verificationCode}
+
+    Best regards,
+    Your Stock Monitoring System
+    `
+  }
+
+  // 發送 email
+  return transporter.sendMail(mailOptions)
+}
+
+// 發送成功更新追蹤股票提示
+const sendToggleDaliyWatchEmail = async (data) => {
+  // 設定 email 的內容
+  const mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: data.email,
+    subject: `指定股票 ${data.stockSymbol} 的每日通知狀態已更新`,
+    text: `
+    ${data.email}, 您好:
+
+    成功更新您的每日通知狀態為: ${data.isDailyNews ? '開啟' : '關閉'}
+    以下是追蹤記錄的相關參數: 
+
+    - 股票代號: ${data.stockSymbol}
+    - RSI 通知警報值: ${data.rsiLow}
+    - 通知時間: 每天 ${data.triggerHour} 時
+    - 是否接收每日更新: ${data.isDailyNews ? '是' : '否'}
+    - 驗證碼: ${data.verificationCode}
+
+    若您有任何疑問或需要協助, 歡迎隨時與我們聯絡。
+    我們很高興能夠為您提供服務, 並祝您投資順利。
+
+    Best regards,
+    Your Stock Monitoring System
+    `
+  }
+
+  // 發送 email
+  return transporter.sendMail(mailOptions)
+}
+
+// 發送成功解除追蹤股票提示
+const sendDropEmail = async (data) => {
+  // 設定 email 的內容
+  const mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: data[0].email,
+    subject: `登記在指定 email 的所有股票追蹤已解除`,
+    text: `
+    ${data[0].email}, 您好:
+
+    感謝您選擇使用我們的服務。
+    登記在 ${data[0].email} 的所有追蹤已解除。
+    
+    若您有任何疑問或需要協助, 歡迎隨時與我們聯絡。
+    希望日後能再次為您提供服務, 並祝您投資順利。
+    
+    Best regards,
+    Your Stock Monitoring System
+    `
+  }
+
+  // 發送 email
+  return transporter.sendMail(mailOptions)
+}
+
 // 將數值轉乘千分位字串顯示(預設取到小數點第二位)
 const formatNumber = (number, decimalPlaces = 2) => {
   const roundedNumber = Number(number.toFixed(decimalPlaces)) // 四捨五入到指定小數點位數
@@ -212,5 +327,9 @@ module.exports = {
   sendDeathCrossAlert,
   sendGoldenCrossAlert,
   sendLowRSIAlert,
-  sendRSIDropAlert
+  sendRSIDropAlert,
+  sendWatchEmail,
+  sendUnwatchEmail,
+  sendToggleDaliyWatchEmail,
+  sendDropEmail
 }

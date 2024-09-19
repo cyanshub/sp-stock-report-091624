@@ -5,6 +5,12 @@ const stockServices = require('../../services/stock-services')
 const { writeRowsCSVFile } = require('../../helpers/csv-helpers')
 const path = require('path')
 const fs = require('fs')
+const {
+  sendWatchEmail,
+  sendUnwatchEmail,
+  sendToggleDaliyWatchEmail,
+  sendDropEmail
+} = require('../../helpers/email-helpers')
 
 // 設計 stockController
 const stockController = {
@@ -65,28 +71,60 @@ const stockController = {
       .catch((err) => next(err)) // 使用 catch 處理異常
   },
   watchStockForEmail: async (req, res, next) => {
-    return stockServices.watchStockForEmail(req, (err, data) => {
-      err ? next(err) : res.json({ status: 200, data })
+    await stockServices.watchStockForEmail(req, async (err, data) => {
+      if (err) next(err)
+
+      // 使用 nodemailer 寄發 watch 記錄
+      await sendWatchEmail(data)
+
+      // 客製化訊息
+      const message = `已成功新增追蹤股票 ${data.stockSymbol}, RSI 警報值設定為 ${data.rsiLow}, 事件通知將在每日 ${data.triggerHour} 時發送至 ${data.email}; 可前往 email 查看設定參數`
+
+      res.json({ status: 200, message, data })
     })
   },
   unwatchStockForEmail: async (req, res, next) => {
-    return stockServices.unwatchStockForEmail(req, (err, data) => {
-      err ? next(err) : res.json({ status: 200, data })
+    return stockServices.unwatchStockForEmail(req, async (err, data) => {
+      if (err) next(err)
+
+      // 使用 nodemailer 寄發 watch 記錄
+      await sendUnwatchEmail(data)
+
+      // 客製化訊息
+      const message = `已成功取消追蹤股票 ${data.stockSymbol}, 將停止發送通知至 ${data.email}, 可前往 email 查看已經取消追蹤的提示訊息`
+      res.json({ status: 200, message, data })
     })
   },
   listWatchesForEmail: async (req, res, next) => {
     return stockServices.listWatchesForEmail(req, (err, data) => {
-      err ? next(err) : res.json({ status: 200, data })
+      if (err) next(err)
+      // 客製化訊息
+      const message = `以下列出 ${data[0].email} 登記追蹤的所有股票 `
+      res.json({ status: 200, message, data })
     })
   },
-  toggleDaliyWatchForEmail: async (req, res, next) => {
-    return stockServices.changeWatchForEmail(req, (err, data) => {
-      err ? next(err) : res.json({ status: 200, data })
+  toogleDaliyWatchForEmail: async (req, res, next) => {
+    return stockServices.toogleDaliyWatchForEmail(req, async (err, data) => {
+      if (err) next(err)
+
+      // 使用 nodemailer 寄發 watch 更新記錄
+      await sendToggleDaliyWatchEmail(data)
+
+      // 客製化訊息
+      const message = `已成功更新追蹤股票 ${data.stockSymbol}, RSI 警報值設定為 ${data.rsiLow}, 通知將發送至 ${data.email}, 可前往 email 查看設定參數`
+
+      res.json({ status: 200, message, data })
     })
   },
   dropEmail: async (req, res, next) => {
-    return stockServices.dropEmail(req, (err, data) => {
-      err ? next(err) : res.json({ status: 200, data })
+    return stockServices.dropEmail(req, async (err, data) => {
+      if (err) next(err)
+
+      // 使用 nodemailer 寄發 watch 更新記錄
+      await sendDropEmail(data)
+      // 客製化訊息
+      const message = `以下列出取消 ${data[0].email} 登記追蹤的所有股票, 亦可前往 email 查看提示訊息 `
+      res.json({ status: 200, message, data })
     })
   }
 }
